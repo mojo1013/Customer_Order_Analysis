@@ -1,0 +1,65 @@
+--How many unique orders were placed in January? In other words, how many distinct order ids do we have?
+
+select count (distinct orderid)
+from bit_db.jansales
+where length(orderid) = 6
+and orderid <> 'Order id';
+
+--How many of those orders were for an iPhone?
+
+select count (distinct orderid)
+from bit_db.jansales
+where product = 'iPhone'
+and length(orderid) = 6
+and orderid <> 'Order Id';
+
+--Select the customer account numbers for all the orders that were placed in February.
+
+select cust.acctnum, feb.orderid
+from bit_db.customers cust
+inner join bit_db.febsales feb
+on cust.order_id = feb.orderID
+where length(orderID) = 6
+and orderID <> 'Order ID';
+
+--Which product was the cheapest one sold in January, and what was the price?
+
+select product, min(price)
+from bit_db.jansales
+order by price desc
+limit 1;
+
+--What is the total revenue for each product sold in January? (Revenue can be calculated using the number of products sold and the price of the products).
+
+select product, max(price) as max_price_each_product, sum(quantity*price) as total_revenue, round(sum(quantity*price), 1) as rounded_revenue
+from bit_db.jansales
+where product <> 'Product'
+group by product
+order by rounded_revenue desc;
+
+--Which products were sold in February at 548 Lincoln St, Seattle, WA 98101, how many of each were sold, and what was the total revenue?
+
+select product, sum(quantity*price) as total_revenue, location
+from bit_db.febsales
+where location = '548 Lincoln St, Seattle, WA 98101'
+group by product
+order by total_revenue desc;
+
+
+--How many customers ordered more than 2 products at a time in February, and what was the average amount spent for those customers?
+
+select count (distinct cust.acctnum), avg(quantity*price) as average_amount, round(avg(quantity*price)) as rounded_avg_amt
+from bit_db.febsales feb
+left join bit_db.customers cust
+on feb.orderID = cust.order_id
+where feb.quantity > 2
+and length(orderid) = 6
+and orderid <> 'Order ID';
+
+--List all the products sold in Los Angeles in February, and include how many of each were sold.
+
+select product, sum(quantity)
+from bit_db.febsales
+where location like '%Los Angeles%'
+group by product;
+
